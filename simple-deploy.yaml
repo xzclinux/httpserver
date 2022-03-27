@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpserver
+  labels:
+    app: httpserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpserver
+  template:
+    metadata:
+      labels:
+        app: httpserver
+    spec:
+      imagePullSecrets:
+      - name: cloudnative
+      containers:
+      - name: httpserver
+        image: harbor.mypaas.com/test/simple:v032718
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8088
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8088
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        resources:
+          limits:
+            cpu: '0.2'
+            memory: 200Mi
+          requests:
+            cpu: '0.1'
+            memory: 100Mi
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "ls /app/httpserver/"]
+          preStop:
+            exec:
+              command: ["/bin/sh","-c","/app/httpserver/stop.sh"]
+----
+#simple-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpserver-svc
+  labels:
+    app: httpserver
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8088
+      targetPort: http
+  selector:
+    app: httpserver
+  type: ClusterIP
+---
+#httpserver-ing.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpserver-ingress
+  labels:
+    app: httpserver
+spec:
+  tls:
+    - hosts:
+        - httpserver.mypaas.com
+  rules:
+    - host: httpserver.mypaas.com
+      http:
+        paths:
+          - path: /test1
+            backend:
+              service:
+                name: httpserver-svc
+                port:
+                  name: http
+
+
