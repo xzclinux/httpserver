@@ -44,7 +44,7 @@ spec:
           preStop:
             exec:
               command: ["/bin/sh","-c","/app/httpserver/stop.sh"]
-----
+---
 #simple-svc.yaml
 apiVersion: v1
 kind: Service
