@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: httpserver
+    release: prometheus
+  name: httpserver
+  namespace: prometheus
+spec:
+  endpoints:
+    - port: http
+  jobLabel: httpserver
+  namespaceSelector:
+    matchNames:
+      - default
+    matchLabels:
+      app: httpserver

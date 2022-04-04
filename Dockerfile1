@@ -7,7 +7,7 @@ ENV GOPROXY=https://goproxy.cn,direct
 RUN cd src && GOOS=linux go build -installsuffix cgo -o httpserver main.go
 
 FROM busybox
-COPY --from=build //httpserver/src/httpserver /httpserver/httpserver
+COPY --from=build /httpserver/httpserver /httpserver/httpserver
 EXPOSE 8360
 ENV ENV local
 WORKDIR /httpserver/
